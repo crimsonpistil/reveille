@@ -140,39 +140,28 @@ Based on the following headlines, write a concise, professional intel-style dail
 
 Format it EXACTLY like this:
 
-════════════════════════════
-REVEILLE -- DAILY BRIEF
-{today} | 0800 EASTERN
-════════════════════════════
+REVEILLE -- DAILY BRIEF // {today} | 0800 EASTERN
 
-EXECUTIVE SUMMARY
-[2-3 sentence overview of the most important developments across all categories]
+*EXECUTIVE SUMMARY*
+[2 sentence overview of the most important developments across all categories]
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-U.S. MILITARY & DOD
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+*U.S. MILITARY & DOD*
 - [bullet point]
 - [bullet point]
 - [bullet point]
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-GEOPOLITICS & THINK TANKS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+*GEOPOLITICS & THINK TANKS*
 - [bullet point]
 - [bullet point]
 - [bullet point]
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-INTELLIGENCE & OSINT
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+*INTELLIGENCE & OSINT*
 - [bullet point]
 - [bullet point]
 - [bullet point]
 
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-CYBER & VETERAN AFFAIRS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+*VETERAN AFFAIRS*
 - [bullet point]
 - [bullet point]
 
