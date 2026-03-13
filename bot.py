@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands, tasks
 from discord import app_commands
 import os
+import json
 import asyncio
 from datetime import datetime, timezone, timedelta
 from dotenv import load_dotenv
@@ -16,30 +17,44 @@ ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 BRIEF_CHANNEL_ID = 1482095132290318346  # 📜・daily-brief
 BRIEF_HOUR_UTC = 13      # 0800 Eastern Standard = 1300 UTC
 BRIEF_MINUTE_UTC = 0
+SEEN_FILE = "/data/seen.json"
+SEEN_EXPIRY_DAYS = 7
 
 # ── RSS Feed Sources ───────────────────────────────────────────────────────────
 RSS_FEEDS = [
-    # US Military / DoD
+    # --- US Military & DoD ---
     ("Defense One", "https://www.defenseone.com/rss/all/"),
     ("Military Times", "https://www.militarytimes.com/arc/outboundfeeds/rss/"),
     ("DoD News", "https://www.defense.gov/DesktopModules/ArticleCS/RSS.ashx?ContentType=1&Site=945&max=10"),
     ("Stars and Stripes", "https://www.stripes.com/arc/outboundfeeds/rss/"),
     ("Defense News", "https://www.defensenews.com/arc/outboundfeeds/rss/"),
     ("Task & Purpose", "https://taskandpurpose.com/feed/"),
-    # Geopolitical
-    ("Reuters World", "https://feeds.reuters.com/reuters/worldNews"),
-    ("BBC World", "http://feeds.bbci.co.uk/news/world/rss.xml"),
+    ("Breaking Defense", "https://breakingdefense.com/feed/"),
+
+    # --- Geopolitics & Think Tanks ---
     ("War on the Rocks", "https://warontherocks.com/feed/"),
     ("Foreign Policy", "https://foreignpolicy.com/feed/"),
     ("ISW", "https://www.understandingwar.org/rss.xml"),
     ("RAND Corporation", "https://www.rand.org/pubs/rss/research_briefs.xml"),
-    # OSINT & Intel
+    ("Small Wars Journal", "https://smallwarsjournal.com/rss.xml"),
+
+    # --- Intelligence & OSINT ---
+    ("Recorded Future - The Record", "https://therecord.media/feed/"),
+    ("Recorded Future - Insikt Group", "https://www.recordedfuture.com/research/insikt-group/feed"),
     ("Bellingcat", "https://www.bellingcat.com/feed/"),
-    ("The War Zone", "https://www.thedrive.com/the-war-zone/rss"),
+    ("The War Zone", "https://www.twz.com/feed"),
     ("Oryx", "https://www.oryxspioenkop.com/feeds/posts/default"),
-    # Cyber / Defense Tech
+    ("CISA Alerts", "https://www.cisa.gov/cybersecurity-advisories/all.xml"),
+    ("ODNI News", "https://www.dni.gov/index.php/newsroom/press-releases?format=feed&type=rss"),
+
+    # --- Domain Specific ---
+    ("USNI News", "https://news.usni.org/feed"),
+    ("Naval News", "https://www.navalnews.com/feed/"),
+    ("Aviation Week Defense", "https://aviationweek.com/rss/defense"),
+    ("Space Force News", "https://www.spaceforce.mil/RSS/"),
+
+    # --- Cyber & Vet Affairs ---
     ("Krebs on Security", "https://krebsonsecurity.com/feed/"),
-    # Veteran Affairs
     ("VA News", "https://news.va.gov/feed/"),
 ]
 
@@ -51,11 +66,44 @@ intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 anthropic_client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
+# ── Seen articles tracker ──────────────────────────────────────────────────────
+def load_seen() -> dict:
+    """Load seen article URLs with timestamps."""
+    if os.path.exists(SEEN_FILE):
+        with open(SEEN_FILE, "r") as f:
+            return json.load(f)
+    return {}
+
+def save_seen(data: dict):
+    os.makedirs(os.path.dirname(SEEN_FILE), exist_ok=True)
+    with open(SEEN_FILE, "w") as f:
+        json.dump(data, f, indent=2)
+
+def prune_seen(data: dict) -> dict:
+    """Remove entries older than SEEN_EXPIRY_DAYS."""
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=SEEN_EXPIRY_DAYS)).isoformat()
+    return {url: ts for url, ts in data.items() if ts >= cutoff}
+
+def mark_seen(urls: list):
+    """Mark a list of URLs as seen."""
+    data = load_seen()
+    data = prune_seen(data)
+    now = datetime.now(timezone.utc).isoformat()
+    for url in urls:
+        data[url] = now
+    save_seen(data)
+
 # ── RSS Fetching ───────────────────────────────────────────────────────────────
-def fetch_headlines() -> str:
-    """Fetch recent headlines from all RSS feeds."""
-    cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
+def fetch_headlines() -> tuple[str, list]:
+    """
+    Fetch new headlines from all RSS feeds.
+    Returns (formatted headlines string, list of seen URLs to mark).
+    """
+    seen = load_seen()
+    seen = prune_seen(seen)
+
     all_headlines = []
+    new_urls = []
 
     for source_name, url in RSS_FEEDS:
         try:
@@ -63,18 +111,26 @@ def fetch_headlines() -> str:
             for entry in feed.entries[:5]:
                 title = entry.get("title", "").strip()
                 summary = entry.get("summary", "").strip()[:200]
-                published = entry.get("published", "")
-                if title:
-                    all_headlines.append(
-                        f"[{source_name}] {title}\n{summary}"
-                    )
+                link = entry.get("link", "").strip()
+
+                if not title or not link:
+                    continue
+
+                # Skip if already seen
+                if link in seen:
+                    continue
+
+                all_headlines.append(f"[{source_name}] {title}\n{summary}")
+                new_urls.append(link)
+
         except Exception as e:
             print(f"⚠️ Failed to fetch {source_name}: {e}")
 
     if not all_headlines:
-        return "No headlines available."
+        return "No new headlines since last brief.", []
 
-    return "\n\n".join(all_headlines)
+    print(f"📰 Found {len(all_headlines)} new articles across {len(RSS_FEEDS)} feeds")
+    return "\n\n".join(all_headlines), new_urls
 
 # ── AI Brief Generation ────────────────────────────────────────────────────────
 def generate_brief(headlines: str) -> str:
@@ -85,42 +141,54 @@ def generate_brief(headlines: str) -> str:
 Based on the following headlines, write a concise, professional intel-style daily brief.
 
 Format it EXACTLY like this:
-```
+
 ═══════════════════════════════════════
-🎺 REVEILLE — DAILY BRIEF
-📅 {today} | 0800 EASTERN
+REVEILLE -- DAILY BRIEF
+{today} | 0800 EASTERN
 ═══════════════════════════════════════
 
 EXECUTIVE SUMMARY
-[2-3 sentence overview of the most important developments]
+[2-3 sentence overview of the most important developments across all categories]
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🪖 U.S. MILITARY & DoD
+U.S. MILITARY & DOD
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-• [bullet point]
-• [bullet point]
-• [bullet point]
+- [bullet point]
+- [bullet point]
+- [bullet point]
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🌍 GEOPOLITICAL
+GEOPOLITICS & THINK TANKS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-• [bullet point]
-• [bullet point]
-• [bullet point]
+- [bullet point]
+- [bullet point]
+- [bullet point]
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🎖️ VETERAN AFFAIRS
+INTELLIGENCE & OSINT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-• [bullet point]
-• [bullet point]
+- [bullet point]
+- [bullet point]
+- [bullet point]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DOMAIN: AIR / NAVAL / SPACE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- [bullet point]
+- [bullet point]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CYBER & VETERAN AFFAIRS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- [bullet point]
+- [bullet point]
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ANALYST NOTE
 [1-2 sentence closing observation or item to watch]
 ═══════════════════════════════════════
-```
 
-Keep bullet points concise and factual. Use military terminology where appropriate. Do not editorialize or inject opinion. If a section has no relevant news, write "Nothing significant to report."
+Keep bullet points concise and factual. Use military terminology where appropriate. Do not editorialize or inject opinion. If a section has no relevant news, write "Nothing significant to report." Do not use emojis anywhere in the brief.
 
 HEADLINES:
 {headlines}"""
@@ -146,11 +214,9 @@ async def on_ready():
 # ── Slash Commands ─────────────────────────────────────────────────────────────
 @bot.tree.command(name="brief", description="Generate and post today's daily brief right now")
 async def brief(interaction: discord.Interaction):
-    # Moderator or admin only
     if not interaction.user.guild_permissions.manage_guild:
         await interaction.response.send_message("❌ You need Manage Server permission to use this.", ephemeral=True)
         return
-
     await interaction.response.send_message("📰 Generating brief, stand by...", ephemeral=True)
     await post_brief()
 
@@ -174,21 +240,36 @@ async def post_brief():
         print("❌ Could not find brief channel!")
         return
 
-    print("📰 Fetching headlines...")
-    headlines = await asyncio.to_thread(fetch_headlines)
+    print("📰 Fetching new headlines...")
+    headlines, new_urls = await asyncio.to_thread(fetch_headlines)
 
-    print("🤖 Generating brief with Claude...")
+    if not new_urls:
+        print("ℹ️ No new articles found — skipping brief.")
+        await channel.send("No new stories since the last brief. Check back tomorrow!")
+        return
+
+    print(f"🤖 Generating brief with Claude ({len(new_urls)} new articles)...")
     brief_text = await asyncio.to_thread(generate_brief, headlines)
 
-    # Discord has a 2000 char limit per message — split if needed
+    # Post the brief
     if len(brief_text) <= 2000:
-        await channel.send(brief_text)
+        message = await channel.send(brief_text)
     else:
         chunks = [brief_text[i:i+1990] for i in range(0, len(brief_text), 1990)]
+        message = None
         for chunk in chunks:
-            await channel.send(chunk)
+            message = await channel.send(chunk)
 
-    print("✅ Brief posted!")
+    # Create a discussion thread on the last message
+    today = datetime.now().strftime("%d %b %Y").upper()
+    await message.create_thread(
+        name=f"DISCUSSION -- {today}",
+        auto_archive_duration=1440  # Auto-archive after 24 hours
+    )
+
+    # Mark all new articles as seen AFTER successful post
+    mark_seen(new_urls)
+    print(f"✅ Brief posted with discussion thread! Marked {len(new_urls)} articles as seen.")
 
 # ── Daily task ─────────────────────────────────────────────────────────────────
 @tasks.loop(hours=24)
