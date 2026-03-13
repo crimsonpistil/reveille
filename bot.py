@@ -21,7 +21,7 @@ SEEN_FILE = "/data/seen.json"
 CHANNELS_FILE = "/data/channels.json"
 SEEN_EXPIRY_DAYS = 7
 AUTHORIZED_USER_IDS = {
-    514235621632376868,  # crimson
+    514235621632376868,  # lasagna.jpeg
 }
 
 # ── RSS Feed Sources ───────────────────────────────────────────────────────────
@@ -52,8 +52,9 @@ RSS_FEEDS = [
     ("Oryx", "https://www.oryxspioenkop.com/feeds/posts/default"),
     ("CISA Alerts", "https://www.cisa.gov/cybersecurity-advisories/all.xml"),
     ("ODNI News", "https://www.dni.gov/index.php/newsroom/press-releases?format=feed&type=rss"),
-    # --- Cyber & Vet Affairs ---
     ("Krebs on Security", "https://krebsonsecurity.com/feed/"),
+    # --- Vet Affairs ---
+
     ("VA News", "https://news.va.gov/feed/"),
 ]
 
@@ -144,41 +145,32 @@ Format it EXACTLY like this:
 DAILY BRIEF // {today} | {current_time} EASTERN
 
 EXECUTIVE SUMMARY
-[2-3 sentence overview of the most important developments across all categories]
+[2 sentence overview of the most important developments across all categories]
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-U.S. MILITARY & DOD
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+**U.S. MILITARY & DOD**
 • [bullet point]
 • [bullet point]
 • [bullet point]
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-GEOPOLITICS & THINK TANKS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+**GEOPOLITICS & THINK TANKS**
 • [bullet point]
 • [bullet point]
 • [bullet point]
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-INTELLIGENCE & OSINT
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+**INTELLIGENCE & OSINT**
 • [bullet point]
 • [bullet point]
 • [bullet point]
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-CYBER & VETERAN AFFAIRS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+**VETERAN AFFAIRS**
 • [bullet point]
 • [bullet point]
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-ANALYST NOTE
+*ANALYST NOTE*
 [1-2 sentence closing observation or item to watch]
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Keep bullet points to one sentence maximum. Be extremely concise. Use military terminology where appropriate. Do not editorialize or inject opinion. If a section has no relevant news, write "NSTR". Do not use emojis anywhere in the brief. The entire brief must fit within 1800 characters total.
+
+Keep bullet points to one sentence maximum. Be extremely concise. Use military terminology where appropriate. Do not editorialize or inject opinion. If a section has no relevant news, write "NSTR". Do not use emojis anywhere in the brief. The entire brief must fit within 1900 characters total to fit into one single discord post character limitations, including formatting.
 
 HEADLINES:
 {headlines}"""
