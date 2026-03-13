@@ -140,7 +140,7 @@ Based on the following headlines, write a concise, professional intel-style dail
 
 Format it EXACTLY like this:
 
-REVEILLE -- DAILY BRIEF // {today} | 0800 EASTERN
+DAILY BRIEF // {today} | 0800 EASTERN
 
 *EXECUTIVE SUMMARY*
 [2 sentence overview of the most important developments across all categories]
