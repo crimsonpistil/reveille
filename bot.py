@@ -254,10 +254,21 @@ async def post_brief(mark_as_seen: bool = True):
 
     # Create a discussion thread on the last message
     today = datetime.now().strftime("%d %b %Y").upper()
-    await message.create_thread(
+    thread = await message.create_thread(
         name=f"DISCUSSION -- {today}",
-        auto_archive_duration=1440  # Auto-archive after 24 hours
+        auto_archive_duration=4320
     )
+
+    # Schedule thread deletion after 2 weeks
+    async def delete_thread_later():
+        await asyncio.sleep(1209600)  # 14 days
+        try:
+            await thread.delete()
+            print(f"✅ Discussion thread deleted.")
+        except Exception as e:
+            print(f"⚠️ Could not delete thread: {e}")
+
+    asyncio.create_task(delete_thread_later())
 
     # Mark all new articles as seen AFTER successful post
     if mark_as_seen:
