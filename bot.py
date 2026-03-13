@@ -13,6 +13,10 @@ load_dotenv()
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 
+AUTHORIZED_USER_IDS = {
+    514235621632376868,  # replace with your actual Discord user ID
+}
+
 # ── Configuration ──────────────────────────────────────────────────────────────
 BRIEF_CHANNEL_ID = 1482095132290318346  # 📜・daily-brief
 BRIEF_HOUR_UTC = 13      # 0800 Eastern Standard = 1300 UTC
