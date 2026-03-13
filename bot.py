@@ -177,7 +177,7 @@ ANALYST NOTE
 [1-2 sentence closing observation or item to watch]
 ═══════════════════════════════════════
 
-Keep bullet points concise and factual. The entire brief must fit within 1800 characters total. Use military terminology where appropriate. Do not editorialize or inject opinion. If a section has no relevant news, write "NSTR". Do not use emojis anywhere in the brief. 
+Keep bullet points concise and factual. The entire brief must fit within 1776 characters total. Use military terminology where appropriate. Do not editorialize or inject opinion. If a section has no relevant news, write "NSTR". Do not use emojis anywhere in the brief. 
 
 HEADLINES:
 {headlines}"""
@@ -223,7 +223,7 @@ async def briefstatus(interaction: discord.Interaction):
     )
 
 # ── Brief posting ──────────────────────────────────────────────────────────────
-async def post_brief():
+async def post_brief(mark_as_seen: bool = True):
     channel = bot.get_channel(BRIEF_CHANNEL_ID)
     if not channel:
         print("❌ Could not find brief channel!")
@@ -257,13 +257,16 @@ async def post_brief():
     )
 
     # Mark all new articles as seen AFTER successful post
-    mark_seen(new_urls)
-    print(f"✅ Brief posted with discussion thread! Marked {len(new_urls)} articles as seen.")
+     if mark_as_seen:
+        mark_seen(new_urls)
+        print(f"✅ Brief posted! Marked {len(new_urls)} articles as seen.")
+    else:
+        print(f"✅ Brief posted! (test run — articles not marked as seen)")
 
 # ── Daily task ─────────────────────────────────────────────────────────────────
 @tasks.loop(hours=24)
 async def daily_brief():
-    await post_brief()
+    await post_brief(mark_as_seen=False)
 
 @daily_brief.before_loop
 async def before_brief():
