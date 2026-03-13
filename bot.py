@@ -133,18 +133,19 @@ def fetch_headlines() -> tuple[str, list]:
 # ── AI Brief Generation ────────────────────────────────────────────────────────
 def generate_brief(headlines: str) -> str:
     """Use Claude to generate an intel-style daily brief."""
-    today = datetime.now().strftime("%d %B %Y").upper()
+    eastern_time = datetime.now(timezone.utc) - timedelta(hours=5)
+    today = eastern_time.strftime("%d %B %Y").upper()
+    current_time = eastern_time.strftime("%H%M")
 
     prompt = f"""You are a military intelligence analyst writing a daily brief for a military Discord server. 
 Based on the following headlines, write a concise, professional intel-style daily brief.
 
 Format it EXACTLY like this:
 
-DAILY BRIEF // {today} | 0800 EASTERN
+DAILY BRIEF // {today} | {current_time} EASTERN
 
 *EXECUTIVE SUMMARY*
 [2 sentence overview of the most important developments across all categories]
-
 
 *U.S. MILITARY & DOD*
 - [bullet point]
@@ -168,7 +169,7 @@ DAILY BRIEF // {today} | 0800 EASTERN
 *ANALYST NOTE*
 [1 sentence closing observation or item to watch]
 
-Keep bullet points concise and factual. Three maximum per section. The entire brief must fit within 1800 characters total. Use military terminology where appropriate. Do not editorialize or inject opinion. If a section has no relevant news, write "NSTR". Do not use emojis anywhere in the brief. 
+Keep bullet points concise and factual. Three maximum per section. The entire brief must fit within 1900 characters total (including formatting, to fit within a single Discord channel post character limit). Use military terminology where appropriate. Do not editorialize or inject opinion. If a section has no relevant news, write "NSTR". Do not use emojis anywhere in the brief. 
 
 HEADLINES:
 {headlines}"""
