@@ -46,9 +46,9 @@ RSS_FEEDS = [
     ("Oryx", "https://www.oryxspioenkop.com/feeds/posts/default"),
     ("CISA Alerts", "https://www.cisa.gov/cybersecurity-advisories/all.xml"),
     ("ODNI News", "https://www.dni.gov/index.php/newsroom/press-releases?format=feed&type=rss"),
-
-    # --- Cyber & Vet Affairs ---
     ("Krebs on Security", "https://krebsonsecurity.com/feed/"),
+
+    # --- Vet Affairs ---
     ("VA News", "https://news.va.gov/feed/"),
 ]
 
@@ -136,10 +136,10 @@ Based on the following headlines, write a concise, professional intel-style dail
 
 Format it EXACTLY like this:
 
-═══════════════════════════════════════
+════════════════════════════
 REVEILLE -- DAILY BRIEF
 {today} | 0800 EASTERN
-═══════════════════════════════════════
+════════════════════════════
 
 EXECUTIVE SUMMARY
 [2-3 sentence overview of the most important developments across all categories]
@@ -177,7 +177,7 @@ ANALYST NOTE
 [1-2 sentence closing observation or item to watch]
 ═══════════════════════════════════════
 
-Keep bullet points concise and factual. The entire brief must fit within 1776 characters total. Use military terminology where appropriate. Do not editorialize or inject opinion. If a section has no relevant news, write "NSTR". Do not use emojis anywhere in the brief. 
+Keep bullet points concise and factual. The entire brief must fit within 1900 characters total. Use military terminology where appropriate. Do not editorialize or inject opinion. If a section has no relevant news, write "NSTR". Do not use emojis anywhere in the brief. 
 
 HEADLINES:
 {headlines}"""
@@ -221,6 +221,17 @@ async def briefstatus(interaction: discord.Interaction):
     await interaction.response.send_message(
         f"📅 Next brief posts in **{hours}h {minutes}m** (0800 Eastern).", ephemeral=True
     )
+
+@bot.tree.command(name="clearseen", description="Clear the seen articles cache")
+async def clearseen(interaction: discord.Interaction):
+    if interaction.user.id not in AUTHORIZED_USER_IDS:
+        await interaction.response.send_message("❌ You are not authorized to use this command.", ephemeral=True)
+        return
+    if os.path.exists(SEEN_FILE):
+        os.remove(SEEN_FILE)
+        await interaction.response.send_message("🗑️ Seen articles cache cleared. Next brief will pull all available articles.", ephemeral=True)
+    else:
+        await interaction.response.send_message("Nothing to clear — cache is already empty.", ephemeral=True)
 
 # ── Brief posting ──────────────────────────────────────────────────────────────
 async def post_brief(mark_as_seen: bool = True):
