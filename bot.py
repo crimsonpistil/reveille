@@ -165,12 +165,10 @@ REVEILLE -- DAILY BRIEF // {today} | 0800 EASTERN
 - [bullet point]
 - [bullet point]
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-ANALYST NOTE
-[1-2 sentence closing observation or item to watch]
-═══════════════════════════════════════
+*ANALYST NOTE*
+[1 sentence closing observation or item to watch]
 
-Keep bullet points concise and factual. The entire brief must fit within 1900 characters total. Use military terminology where appropriate. Do not editorialize or inject opinion. If a section has no relevant news, write "NSTR". Do not use emojis anywhere in the brief. 
+Keep bullet points concise and factual. Three maximum per section. The entire brief must fit within 1800 characters total. Use military terminology where appropriate. Do not editorialize or inject opinion. If a section has no relevant news, write "NSTR". Do not use emojis anywhere in the brief. 
 
 HEADLINES:
 {headlines}"""
