@@ -268,7 +268,7 @@ async def post_brief(mark_as_seen: bool = True):
     )
 
     # Mark all new articles as seen AFTER successful post
-     if mark_as_seen:
+    if mark_as_seen:
         mark_seen(new_urls)
         print(f"✅ Brief posted! Marked {len(new_urls)} articles as seen.")
     else:
