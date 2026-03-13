@@ -21,7 +21,7 @@ SEEN_FILE = "/data/seen.json"
 CHANNELS_FILE = "/data/channels.json"
 SEEN_EXPIRY_DAYS = 7
 AUTHORIZED_USER_IDS = {
-    148203982143318032,  # crimson
+    514235621632376868,  # crimson
 }
 
 # ── RSS Feed Sources ───────────────────────────────────────────────────────────
