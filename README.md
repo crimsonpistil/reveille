@@ -154,7 +154,7 @@ ANALYST NOTE
 
 | Intelligence & OSINT | Recorded Future (The Record), Recorded Future (Insikt Group), Bellingcat, The War Zone, Oryx, CISA Alerts, ODNI News |
 
-| Cyber & Veteran Affairs | Krebs on Security, VA News |
+| Veteran Affairs | VA News |
 
 
 
