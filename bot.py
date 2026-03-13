@@ -144,7 +144,7 @@ Format it EXACTLY like this:
 
 DAILY BRIEF // {today} | {current_time} EASTERN
 
-EXECUTIVE SUMMARY
+**EXECUTIVE SUMMARY**
 [2 sentence overview of the most important developments across all categories]
 
 **U.S. MILITARY & DOD**
@@ -166,7 +166,7 @@ EXECUTIVE SUMMARY
 • [bullet point]
 • [bullet point]
 
-*ANALYST NOTE*
+**ANALYST NOTE**
 [1-2 sentence closing observation or item to watch]
 
 
